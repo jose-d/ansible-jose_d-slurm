@@ -121,20 +121,31 @@ def run_module():
 
     # arguments/parameters:
     module_args = {
-        "nodes": {"type": list, "required": True, "default":None},
-        "new_state": {"type": str, "required": False },
-        "new_state_reason": {"type": str, "required":False, "default":None}
+        "nodes": {
+            "type": list,
+            "required": True,
+            "default": None
+        },
+        "new_state": {
+            "type": str,
+            "required": False
+        },
+        "new_state_reason": {
+            "type": str,
+            "required": False,
+            "default": None
+        }
     }
 
     # RESULTS:
-    result = dict(
-        changed=False,
-        state_changed=False,
-        reason_changed=False,
-        scontrol_commands=[],
-        data='',
-        scontrol_update_ran=False
-    )
+    result = {
+        'changed': False,
+        'state_changed': False,
+        'reason_changed': False,
+        'scontrol_commands': [],
+        'data': '',
+        'scontrol_update_ran': False
+    }
 
     module = AnsibleModule(
         argument_spec=module_args,
@@ -145,11 +156,11 @@ def run_module():
     sanitize_input(module,result)
 
     # verify if slurm controller is alive
-    scontrol_ping(module,result)
+    scontrol_ping(module)
 
     nodes = module.params['nodes']
 
-    nodes_1 = collect_nodes_status(nodes,module,result)
+    nodes_1 = collect_nodes_status(nodes,module)
 
     if module.params['new_state']:
 
@@ -180,7 +191,7 @@ def run_module():
                         **result)
 
     if result['scontrol_update_ran']:
-        nodes_2 = collect_nodes_status(nodes,module,result)
+        nodes_2 = collect_nodes_status(nodes,module)
         result['data'] = nodes_2
     else:
         result['data'] = nodes_1
@@ -191,13 +202,13 @@ def run_module():
     module.exit_json(**result)
 
 
-def scontrol_ping(module,result):
+def scontrol_ping(module):
     """" Tests if we have working scontrol"""
 
     scontrol_command = "scontrol ping"
     module.run_command(scontrol_command)
 
-def collect_nodes_status(nodes,module,result):
+def collect_nodes_status(nodes,module):
     """ Run `scontrol show status` over nodes and returns it as a dict"""
 
     nodes_data = {}
@@ -213,6 +224,7 @@ def collect_nodes_status(nodes,module,result):
 
 
 def main():
+    """wrapper for run_module() - described at Ansible documentation"""
     run_module()
 
 if __name__ == '__main__':
