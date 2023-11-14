@@ -1,0 +1,24 @@
+namespace: jose_d
+name: slurm
+version: 0.0.1
+readme: README.md
+authors:
+- Josef Dvoracek <jose@fzu.cz>
+
+description: Collection containing ansible-ware interacting with slurm slurmctld daemon - HPC job manager - eg. draining and undraining nodes, getting node state, etc.
+
+license:
+- GPL-2.0-or-later
+license_file: ''
+
+tags: ['HPC','slurm']
+
+dependencies: {}
+
+#repository: http://example.com/repository
+#documentation: http://docs.example.com
+#homepage: http://example.com
+#issues: http://example.com/issue/tracker
+
+build_ignore: []
+

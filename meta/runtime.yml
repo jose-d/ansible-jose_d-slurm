@@ -1,0 +1,3 @@
+---
+# current ansible
+requires_ansible: '>=2.14.19'
