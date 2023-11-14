@@ -15,10 +15,10 @@ tags: ['HPC','slurm']
 
 dependencies: {}
 
-#repository: http://example.com/repository
+repository: https://github.com/jose-d/ansible-jose_d-slurm
 #documentation: http://docs.example.com
 #homepage: http://example.com
-#issues: http://example.com/issue/tracker
+issues: https://github.com/jose-d/ansible-jose_d-slurm/issues
 
 build_ignore: []
 
