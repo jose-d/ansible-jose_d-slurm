@@ -2,7 +2,7 @@
 
 Interact with slurm instance - drain nodes, read their states,etc.
 
-Install with `ansible-galaxy collection install jose_d.slurm`
+Install with `ansible-galaxy collection install jose_d.slurm`, published in [Ansible Galaxy](https://galaxy.ansible.com/ui/repo/published/jose_d/slurm/).
 
 ## Use
 
