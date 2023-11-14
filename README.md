@@ -12,7 +12,7 @@ Example use:
 
 #### Example 1 - drain node n2 with reason "Node maintenance"
 
-```
+```yaml
 - name: Drain node
   jose_d.slurm.slurm_scontrol:
     nodes:

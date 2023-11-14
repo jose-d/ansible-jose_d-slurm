@@ -7,11 +7,9 @@ authors:
 
 description: Collection containing ansible-ware interacting with slurm slurmctld daemon - HPC job manager - eg. draining and undraining nodes, getting node state, etc.
 
-license:
-- GPL-2.0-or-later
-license_file: ''
+license_file: LICENSE
 
-tags: ['hpc','slurm']
+tags: [hpc,slurm]
 
 dependencies: {}
 
