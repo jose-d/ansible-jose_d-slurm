@@ -59,6 +59,29 @@ EXAMPLES = """
   delegate_to: slurmserver.url
 """
 
+RETURN = """
+data:
+    description: The YAML output obtained from the scontrol command parsed into a dict.
+    type: dict
+    returned: always
+reason_changed:
+    description: If the Reason attribute of a node has been modified, this variable will be set to True.
+    type: bool
+    returned: always
+state_changed:
+    description: This variable is True when the State attribute of a node has been modified.
+    type: bool
+    returned: always
+scontrol_commands:
+    description: List of scontrol commands used to change state of target node
+    type: list
+    returned: always
+scontrol_update_ran:
+    description: If scontrol update command was ran by module
+    type: bool
+    returned: always
+"""
+
 
 # constants:
 NODE_ALLOWED_STATES=['DOWN','DRAIN','FAIL','FUTURE','NORESP',\
