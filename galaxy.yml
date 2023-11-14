@@ -19,4 +19,3 @@ repository: https://github.com/jose-d/ansible-jose_d-slurm
 issues: https://github.com/jose-d/ansible-jose_d-slurm/issues
 
 build_ignore: []
-
