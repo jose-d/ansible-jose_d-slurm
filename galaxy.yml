@@ -1,6 +1,6 @@
 namespace: jose_d
 name: slurm
-version: 0.0.1
+version: 0.0.18
 readme: README.md
 authors:
 - Josef Dvoracek <jose@fzu.cz>
@@ -11,7 +11,7 @@ license:
 - GPL-2.0-or-later
 license_file: ''
 
-tags: ['HPC','slurm']
+tags: ['hpc','slurm']
 
 dependencies: {}
 
