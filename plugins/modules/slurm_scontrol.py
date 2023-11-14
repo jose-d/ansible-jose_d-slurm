@@ -150,7 +150,7 @@ def run_module():
     if module.params['new_state']:
 
         new_state = str(module.params['new_state']).upper()
-        new_state_reason str(module.params['new_state_reason'])
+        new_state_reason = str(module.params['new_state_reason'])
 
         for node in nodes:
 
@@ -165,12 +165,15 @@ def run_module():
 
             result['scontrol_update_ran'] = True
 
-            scontrol_command = f"scontrol update node={node} state={new_state} reason=\"{new_state_reason}\""
+            scontrol_command = \
+                f"scontrol update node={node} state={new_state} reason=\"{new_state_reason}\""
             result['scontrol_commands'].append(scontrol_command)
             if not module.check_mode:
                 res = module.run_command(scontrol_command)
                 if res != 0:
-                    module.fail_json(msg=f"Calling {scontrol_command} returned non-zero RC", **result)
+                    module.fail_json( \
+                        msg=f"Calling {scontrol_command} returned non-zero RC", \
+                        **result)
 
     if result['scontrol_update_ran']:
         nodes_2 = collect_nodes_status(nodes,module,result)
@@ -181,7 +184,6 @@ def run_module():
     #compile informations if changed:
 
     result['changed'] = result['scontrol_update_ran']
-    
     module.exit_json(**result)
 
 
