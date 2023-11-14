@@ -40,20 +40,29 @@ options:
 """
 
 EXAMPLES = """
-```
-- name: Read state of node n2 and n3 and register it into nodes_state variable
-  slurm_scontrol:
+- name: Read state of node n[2,3] and register result into nodes_state
+  jose_d.slurm.slurm_scontrol:
     nodes:
       - n2
       - n3
   register: nodes_state
   delegate_to: slurmserver.url
-```
+
+- name: Drain nodes n2 and n3 and register resulting state into nodes_state
+  jose_d.slurm.slurm_scontrol:
+    nodes:
+      - n2
+      - n3
+    new_state: DRAIN
+    new_state_reason: Ansible testing
+  register: nodes_state
+  delegate_to: slurmserver.url
 """
 
 
 # constants:
-NODE_ALLOWED_STATES=['DOWN','DRAIN','FAIL','FUTURE','NORESP','POWER_DOWN','POWER_DOWN_ASAP','POWER_DOWN_FORCE','POWER_UP','RESUME','UNDRAIN']
+NODE_ALLOWED_STATES=['DOWN','DRAIN','FAIL','FUTURE','NORESP',\
+    'POWER_DOWN','POWER_DOWN_ASAP','POWER_DOWN_FORCE','POWER_UP','RESUME','UNDRAIN']
 
 def run_module():
     
