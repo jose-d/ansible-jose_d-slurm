@@ -5,43 +5,42 @@
 # Module to interact with slurm controller using scontrol
 
 from __future__ import (absolute_import, division, print_function)
-__metaclass__ = type
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.common import yaml
 
-DOCUMENTATION = r'''
+DOCUMENTATION = """
 ---
 module: slurm_scontrol
-
+version_added: "0.0.4"
+author: Josef Dvoracek (@jose-d)
 short_description: Module interacting with slurmctld using scontrol
-
-version_added: "0.0.1"
-
-description: The slurm_scontrol module provides the capability 
-to modify or retrieve the state of a node within the Slurm workload 
-manager through the utilization of the scontrol command.
-
+description:
+  - The slurm_scontrol module provides the capability
+  - to modify or retrieve the state of a node within the Slurm workload
+  - manager through the utilization of the scontrol command.
 options:
     nodes:
-        description: List of nodes for the purpose of reading or modifying their states
+        description:
+            - List of nodes for the purpose of reading or modifying their states.
         required: true
         type: list
+        elements: str
     new_state:
         description:
             - If specified, new_state will be configured at nodes.
-            - available states: DOWN,DRAIN,FAIL,FUTURE,NORESP,POWER_DOWN,POWER_DOWN_ASAP,POWER_DOWN_FORCE,POWER_UP,RESUME,UNDRAIN
+            - available states DOWN,DRAIN,FAIL,FUTURE,NORESP,POWER_DOWN,POWER_DOWN_ASAP,POWER_DOWN_FORCE,POWER_UP,RESUME,UNDRAIN.
         required: false
-        type: string
+        type: str
     new_state_reason:
         description:
             - Reason to be used together with "drain" state
+            - eg. 'node maintenance'
         required: false
+        type: str
+"""
 
-author: Josef Dvoracek (@jose-d)
-'''
-
-EXAMPLES = r'''
-# Read state of node
+EXAMPLES = """
+```
 - name: Read state of node n2 and n3 and register it into nodes_state variable
   slurm_scontrol:
     nodes:
@@ -49,64 +48,9 @@ EXAMPLES = r'''
       - n3
   register: nodes_state
   delegate_to: slurmserver.url
+```
+"""
 
-# Drain nodes with reason
-- name: Drain nodes n2 and n3 and register their resulting state into nodes_state variable
-  slurm_scontrol:
-    nodes:
-      - n2
-      - n3
-    new_state: DRAIN
-    new_state_reason: Ansible testing
-  register: nodes_state
-  delegate_to: slurmserver.url
-
-'''
-
-RETURN = r'''
-data:
-    description: output of scontrol show command
-    type: dict
-    returned: always
-    sample:
-        "n2": {
-                "active_features": [],
-                "address": "n2.phoebe.lan",
-                "alloc_cpus": 0,
-                "alloc_idle_cpus": 128,
-                ...
-               }
-reason_changed:
-    description: If Reason was changed
-    type: bool
-    returned: always
-    sample:
-        "reason_changed": true
-
-scontrol_commands:
-    description: List of scontrol commands which were used to change state of target node
-    type: list
-    returned: always
-    sample:
-        "scontrol_commands": [
-            "scontrol update node=n2 state=DRAIN reason=\"Code testing25S\""
-        ],
-
-scontrol_update_ran:
-    description: If scontrol update command was ran by module
-    type: bool
-    returned: always
-    sample:
-        "scontrol_update_ran": true,
-
-
-state_changed:
-    description: If State was changed
-    type: bool
-    returned: always
-    sample:
-        "state_changed": false
-'''
 
 # constants:
 NODE_ALLOWED_STATES=['DOWN','DRAIN','FAIL','FUTURE','NORESP','POWER_DOWN','POWER_DOWN_ASAP','POWER_DOWN_FORCE','POWER_UP','RESUME','UNDRAIN']
@@ -150,7 +94,7 @@ def run_module():
             try: 
                 assert len(str(module.params['new_state_reason']))>1
                 assert module.params['new_state_reason'] != None
-            except: 
+            except:
                 module.fail_json(msg=f"If next state if drain, we need 'new_state_reason' argument to be specified.", **result)
 
     # verify if slurm controller is alive
