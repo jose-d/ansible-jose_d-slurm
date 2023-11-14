@@ -2,12 +2,15 @@
 
 Interact with slurm instance - drain nodes, read their states,etc.
 
+Install with `ansible-galaxy collection install jose_d.slurm`
 
-## `slurm_scontrol`
+## Use
+
+### slurm_scontrol
 
 Example use:
 
-### Example 1 - drain node n2 with reason "Node maintenance"
+#### Example 1 - drain node n2 with reason "Node maintenance"
 
 ```
 - name: Drain node
