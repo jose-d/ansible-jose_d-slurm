@@ -20,3 +20,5 @@ Example use:
   delegate_to: slurm1.cluster.lan
 
 ```
+
+![Pylint](https://github.com/jose-d/ansible-jose_d-slurm/actions/workflows/pylint.yml/badge.svg)
