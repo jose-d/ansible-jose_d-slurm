@@ -8,7 +8,7 @@ from __future__ import (absolute_import, division, print_function)
 from ansible.module_utils.basic import AnsibleModule
 from ansible.module_utils.common import yaml
 
-DOCUMENTATION = """
+DOCUMENTATION = r"""
 ---
 module: slurm_scontrol
 version_added: "0.0.4"
@@ -39,7 +39,7 @@ options:
         type: str
 """
 
-EXAMPLES = """
+EXAMPLES = r"""
 - name: Read state of node n[2,3] and register result into nodes_state
   jose_d.slurm.slurm_scontrol:
     nodes:
@@ -59,7 +59,7 @@ EXAMPLES = """
   delegate_to: slurmserver.url
 """
 
-RETURN = """
+RETURN = r"""
 data:
     description: The YAML output obtained from the scontrol command parsed into a dict.
     type: dict
@@ -87,8 +87,34 @@ scontrol_update_ran:
 NODE_ALLOWED_STATES=['DOWN','DRAIN','FAIL','FUTURE','NORESP',\
     'POWER_DOWN','POWER_DOWN_ASAP','POWER_DOWN_FORCE','POWER_UP','RESUME','UNDRAIN']
 
+STATES_NEED_REASON=['DRAIN']
+
+def sanitize_input(module,result):
+    '''Sanitization of module arguments'''
+
+    # verify if state is allowed
+    if (
+        ( module.params['new_state'] ) and
+        ( str(module.params['new_state']).upper() not in NODE_ALLOWED_STATES )
+    ):
+        module.fail_json(msg=f"new_state is not in {NODE_ALLOWED_STATES}", **result)
+
+    # if draining, we need Reason
+    if (
+        ( str(module.params['new_state']).upper() in STATES_NEED_REASON ) and
+        ( module.params['new_state_reason'] is None )
+    ):
+        module.fail_json(msg=f"If next state is in {STATES_NEED_REASON}, \
+            we need 'new_state_reason' argument to be specified.", **result)
+
+    # we need at least one node
+    if not len(module.params['nodes']) > 0:
+        module.fail_json(msg="No nodes provided, that's unexpeted.", **result)
+
+
 def run_module():
-    
+    '''Main logic of module is here'''
+
     # arguments/parameters:
     module_args = dict(
         nodes=dict(type='list', required=True, default=None),
@@ -112,54 +138,42 @@ def run_module():
     )
 
     # Sanity checking:
-
-    if ( module.params['new_state'] ):
-
-        # * if new state must be in NODE_ALLOWED_STATES
-        try:
-            assert str(module.params['new_state']).upper() in NODE_ALLOWED_STATES
-        except:
-            module.fail_json(msg=f"new_state is not in {NODE_ALLOWED_STATES}", **result)
-        
-        # * when changing state to drain, we need reason
-        if ( str(module.params['new_state']).upper() == 'DRAIN' ):
-            try: 
-                assert len(str(module.params['new_state_reason']))>1
-                assert module.params['new_state_reason'] != None
-            except:
-                module.fail_json(msg=f"If next state if drain, we need 'new_state_reason' argument to be specified.", **result)
+    sanitize_input(module,result)
 
     # verify if slurm controller is alive
-    scontrolPing(module,result)
+    scontrol_ping(module,result)
 
-    # Collect current node state using scontrol - if we have more than single
-    if ( len(module.params['nodes']) > 0 ):
-        nodes_1 = collectNodesStatus(module.params['nodes'],module,result)
-    else:
-        module.fail_json(msg=f"No nodes provided, that's unexpeted.", **result)
+    nodes = module.params['nodes']
 
-    if ( len(module.params['nodes']) > 0 ) and ( module.params['new_state'] ):
+    nodes_1 = collect_nodes_status(nodes,module,result)
 
-        for node in module.params['nodes']:
+    if module.params['new_state']:
 
-            result['state_changed'] = not ( str(module.params['new_state']).upper() in nodes_1[node]['state'] )
-            result['reason_changed'] = not ( str(module.params['new_state_reason']) == nodes_1[node]['reason'] )
+        new_state = str(module.params['new_state']).upper()
+        new_state_reason str(module.params['new_state_reason'])
+
+        for node in nodes:
+
+            result['state_changed'] = \
+                not new_state in nodes_1[node]['state']
+            result['reason_changed'] = \
+                not new_state_reason == nodes_1[node]['reason']
 
             # If the node is already drained and reason is same, no need to do anything
-            if not result['state_changed'] and not result['reason_changed']: continue
+            if not result['state_changed'] and not result['reason_changed']:
+                continue
 
             result['scontrol_update_ran'] = True
 
-            try:
-                scontrol_command = f"scontrol update node={node} state={module.params['new_state']} reason=\"{module.params['new_state_reason']}\""
-                result['scontrol_commands'].append(scontrol_command)
-                if not module.check_mode:
-                    scontrol_out = module.run_command(scontrol_command)
-            except:
-                module.fail_json(msg=f"Calling {scontrol_command} failed", **result)
+            scontrol_command = f"scontrol update node={node} state={new_state} reason=\"{new_state_reason}\""
+            result['scontrol_commands'].append(scontrol_command)
+            if not module.check_mode:
+                res = module.run_command(scontrol_command)
+                if res != 0:
+                    module.fail_json(msg=f"Calling {scontrol_command} returned non-zero RC", **result)
 
     if result['scontrol_update_ran']:
-        nodes_2 = collectNodesStatus(module.params['nodes'],module,result)
+        nodes_2 = collect_nodes_status(nodes,module,result)
         result['data'] = nodes_2
     else:
         result['data'] = nodes_1
@@ -171,26 +185,20 @@ def run_module():
     module.exit_json(**result)
 
 
-def scontrolPing(module,result):
-    """" tests if we have working scontrol"""
+def scontrol_ping(module,result):
+    """" Tests if we have working scontrol"""
 
-    try:
-        scontrol_command = f"scontrol ping"
-        module.run_command(scontrol_command)
-    except:
-        module.fail_json(msg=f"Calling {scontrol_command} failed", **result)
+    scontrol_command = "scontrol ping"
+    module.run_command(scontrol_command)
 
-def collectNodesStatus(nodes,module,result):
-    """ run `scontrol show status` over nodes and returns it as a dict"""
+def collect_nodes_status(nodes,module,result):
+    """ Run `scontrol show status` over nodes and returns it as a dict"""
 
     nodes_data = {}
 
     for node in nodes:
-        try:
-            scontrol_command = f"scontrol --yaml show node={node}"
-            scontrol_out = module.run_command(scontrol_command)
-        except:
-            module.fail_json(msg=f"Calling {scontrol_command} failed", **result)
+        scontrol_command = f"scontrol --yaml show node={node}"
+        scontrol_out = module.run_command(scontrol_command)
 
         scontrol_respond_yaml = yaml.yaml_load(scontrol_out[1])
         nodes_data[node] = scontrol_respond_yaml['nodes'][0]
