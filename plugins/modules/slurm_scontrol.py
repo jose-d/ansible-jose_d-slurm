@@ -1,3 +1,7 @@
+"""
+    This module serves as an implementation of an Ansible module, 
+    encapsulating fundamental scontrol commands for seamless integration into Ansible playbooks.
+"""
 #!/usr/bin/env python3
 #
 # Author: Josef Dvoracek - <jose@fzu.cz> or <jose@dvojo.cz>
