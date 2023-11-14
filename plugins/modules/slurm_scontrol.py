@@ -120,11 +120,11 @@ def run_module():
     '''Main logic of module is here'''
 
     # arguments/parameters:
-    module_args = dict(
-        nodes=dict(type='list', required=True, default=None),
-        new_state=dict(type='str', required=False),
-        new_state_reason=dict(type='str', required=False, default=None)
-    )
+    module_args = {
+        "nodes": {"type": list, "required": True, "default":None},
+        "new_state": {"type": str, "required": False },
+        "new_state_reason": {"type": str, "required":False, "default":None}
+    }
 
     # RESULTS:
     result = dict(
@@ -174,7 +174,7 @@ def run_module():
             result['scontrol_commands'].append(scontrol_command)
             if not module.check_mode:
                 res = module.run_command(scontrol_command)
-                if res != 0:
+                if res[0] != 0:
                     module.fail_json( \
                         msg=f"Calling {scontrol_command} returned non-zero RC", \
                         **result)

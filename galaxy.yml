@@ -1,6 +1,6 @@
 namespace: jose_d
 name: slurm
-version: 0.0.27
+version: 0.0.29
 readme: README.md
 authors:
 - Josef Dvoracek <jose@fzu.cz>
