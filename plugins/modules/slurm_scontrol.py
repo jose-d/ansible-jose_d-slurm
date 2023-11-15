@@ -94,7 +94,7 @@ NODE_ALLOWED_STATES=['DOWN','DRAIN','FAIL','FUTURE','NORESP',\
 STATES_NEED_REASON=['DRAIN']
 
 def sanitize_input(module,result):
-    '''Sanitization of module arguments'''
+    """Sanitization of module arguments"""
 
     # verify if state is allowed
     if (
@@ -117,7 +117,7 @@ def sanitize_input(module,result):
 
 
 def run_module():
-    '''Main logic of module is here'''
+    """Main logic of module is here"""
 
     # arguments/parameters:
     module_args = {
@@ -170,7 +170,7 @@ def run_module():
         for node in nodes:
 
             result['state_changed'] = \
-                not new_state in nodes_1[node]['state']
+                new_state not in nodes_1[node]['state']
             result['reason_changed'] = \
                 not new_state_reason == nodes_1[node]['reason']
 
